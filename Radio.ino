@@ -11,20 +11,36 @@ int i2c_read(int addr);
 
 const int dev_addr = 0x10; //M6951のデバイスIDらしい・・・
 
+
+/*
+  {gen-fmchannel}
+
+  int channel = (rawHz - 300) * 4;
+  int upper_bits = (channel >> 8) | 0x40;
+  int lower_bits = channel & 0xff;
+
+  {gen-amchannel}
+
+  int channel = 1440/3;
+
+  int upper_bits = (channel >> 8) | 0x60;
+  int lower_bits = channel & 0xff;
+*/
+
 void setup() {
   Wire.begin();
   i2c_send(0x00, DEFAULT_SETTING);
   i2c_send(0x01, 0b00001000);//AM(520-1710KHz, 5KHz Step)
-  i2c_send(0x09, 0b00001111);//volume can control by I2C 
+  i2c_send(0x09, 0b00001111);//volume can control by I2C
 
   i2c_send(0x06, 0b10110101);//Volume(45)
 
   delay(10);
 
- // int AMkhz = 1440;
-  int channel = (1440 - 30) / 0.025;
+  // int AMkhz = 1440;
+  int channel = 1440/3;
 
-  int upper_bits = (channel >> 8) | 0x40;
+  int upper_bits = (channel >> 8) | 0x60;
   int lower_bits = channel & 0xff;
 
   i2c_send(0x02, upper_bits);
@@ -35,18 +51,18 @@ void loop() {
   // put your main code here, to run repeatedly:
 }
 
-void i2c_send(int addr, int value){
-	Wire.beginTransmission(dev_addr);
-	Wire.write(addr);
-	Wire.write(value);
-	Wire.endTransmission();
-	delay(3);
+void i2c_send(int addr, int value) {
+  Wire.beginTransmission(dev_addr);
+  Wire.write(addr);
+  Wire.write(value);
+  Wire.endTransmission();
+  delay(3);
 }
 
-int i2c_read(int addr){
-	Wire.beginTransmission(dev_addr);
-	Wire.write(addr);
-	Wire.endTransmission();
-	Wire.requestFrom(dev_addr, 8);
-	return Wire.read();
+int i2c_read(int addr) {
+  Wire.beginTransmission(dev_addr);
+  Wire.write(addr);
+  Wire.endTransmission();
+  Wire.requestFrom(dev_addr, 8);
+  return Wire.read();
 }
